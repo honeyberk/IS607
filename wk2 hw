@@ -1,0 +1,85 @@
+/* Honey Berk, IS 607 - Wk2 Assignment */
+
+/* Wk 2 Assignment, Q1 */
+select dest, distance
+from flights
+where arr_delay is not null
+group by dest, distance
+order by distance desc
+limit 1
+/* HNL - 4983 miles */
+
+
+/* Wk2 Assignment, Q2 */
+select manufacturer, model, engines, seats
+from planes
+order by engines desc, seats desc, model asc
+/*
+1, 2, 3, 4 engines:
+4 engines - BOEING 747-451 - 450 seats
+3 engines - AIRBUS A330-223 - 379 seats
+2 engines - BOEING 777-200, 777-222, 777-224, 777-232 - 400 seats
+1 engine - DEHAVILLAND OTTER DHC-3 - 16 seats
+*/
+
+
+/* Wk2 Assignment, Q3 */
+SELECT 	F.origin AS "Airport",
+	F.month AS "Month",
+	F.day AS "Day",
+	F.hour AS "Hour",
+	F.minute AS "Minute",
+	F.dep_delay AS "Departure Delay (mins.)",
+	W.temp AS "Temperature",
+	W.dewp AS "Dewpoint", 
+	W.humid AS "Humidity", 
+	W.wind_dir AS "Wind Direction (deg)",
+	W.wind_speed AS "Wind Speed (mph)",
+	W.wind_gust AS "Wind Gust (mph)",
+	W.precip AS "Precipitation (in.)",
+	W.pressure AS "Pressure (mbar)",
+	W.visib AS "Visibility (mi.)"
+FROM flights as F
+INNER JOIN weather as W
+ON F.origin = W.origin
+WHERE F.dep_delay > 0
+	AND F.year = 2013 AND W.year = 2013
+	AND F.month = 12 AND W.month = 12
+	AND F.hour = W.hour
+GROUP BY F.origin, F.month, F.day, F.hour, F.minute, F.dep_delay, W.temp, W.dewp, W.humid, W.wind_dir, W.wind_speed, W.wind_gust, W.precip, W.pressure, W.visib
+ORDER BY 
+	F.month,
+	F.day ASC,
+	F.hour ASC,
+	F.minute ASC,
+	F.dep_delay DESC,
+	F.origin
+/* SEE EXCEL DOC "Honey Berk - wk2 hw" FOR OUTPUT */
+
+
+/* Wk2 Assignment, Q4 */
+SELECT P.year as "Year Plane Manufactured", COUNT (P.year) AS "# Flights Delayed Per Year"
+FROM flights AS F
+JOIN planes as P
+ON F.tailnum = P.tailnum
+WHERE dep_delay > 0 AND P.year IS NOT NULL
+GROUP BY P.year
+ORDER BY P.year DESC
+/* No */
+/* SEE EXCEL DOC "Honey Berk - wk2 hw" FOR OUTPUT */
+
+/* Wk2 Assignment, Q5 */
+SELECT f.tailnum, CONCAT(p.manufacturer, ' ', p.model) AS "Plane", ROUND(AVG(f.air_time),0) AS "Avg. Air Time", 
+	ROUND(AVG(f.distance),0) AS "Avg. Distance", ROUND((((AVG(f.distance)) / AVG(f.air_time))*60),0) AS "Calculated Speed (mph)", 
+	p.speed AS "Actual Speed (mph)", ROUND(((ROUND((((AVG(f.distance))/AVG(f.air_time))*60),0))- p.speed),0) AS "Speed Variation (mph)"
+FROM flights F
+INNER JOIN planes P
+ON f.tailnum = p.tailnum
+WHERE p.year IS NOT NULL AND p.speed IS NOT NULL
+GROUP BY f.tailnum /*, f.distance*/, "Plane", "Actual Speed (mph)"
+ORDER BY "Speed Variation (mph)" desc
+/* Q: How do the calculated average air speeds per type of plane compare with the average cruising speed for that equipment, as provided in the data set? */
+/* A: Out of the small subset of entries that included speed, there was variation in every instance -- most very large. */
+/* SEE EXCEL DOC "Honey Berk - wk2 hw" FOR OUTPUT */
+
+
