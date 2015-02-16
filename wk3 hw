@@ -1,4 +1,4 @@
--- LEGODDL.sql
+-- LEGO.sql
 --
 
 DROP TABLE IF EXISTS LEGOProducts;
