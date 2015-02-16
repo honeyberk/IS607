@@ -1,0 +1,104 @@
+-- LEGODDL.sql
+--
+
+DROP TABLE IF EXISTS LEGOProducts;
+DROP TABLE IF EXISTS LEGOThemes;
+DROP TABLE IF EXISTS LEGOSets;
+DROP TABLE IF EXISTS LEGOBricks;
+DROP TABLE IF EXISTS LEGOBrickList;
+DROP TABLE IF EXISTS LEGOBrickColors;
+
+CREATE TABLE LEGOProducts
+(
+  product_id int PRIMARY KEY,
+  product_name varchar NOT NULL
+);
+
+INSERT INTO LEGOProducts ( product_id, product_name ) VALUES ( 100, 'Bricks' );
+INSERT INTO LEGOProducts ( product_id, product_name ) VALUES ( 200, 'Sets' );
+INSERT INTO LEGOProducts ( product_id, product_name ) VALUES ( 300, 'Accessories' );
+INSERT INTO LEGOProducts ( product_id, product_name ) VALUES ( 400, 'Games' );
+
+SELECT * FROM LEGOProducts;
+
+CREATE TABLE LEGOThemes
+(
+  theme_id int PRIMARY KEY,
+  theme_name VARCHAR NOT NULL,
+  product_id int NOT NULL REFERENCES LEGOProducts
+);
+
+INSERT INTO LEGOThemes ( theme_id, theme_name, product_id ) VALUES ( 105, 'Duplo', 200 );
+INSERT INTO LEGOThemes ( theme_id, theme_name, product_id ) VALUES ( 210, 'Architecture', 200 );
+INSERT INTO LEGOThemes ( theme_id, theme_name, product_id ) VALUES ( 600, 'City', 200 );
+INSERT INTO LEGOThemes ( theme_id, theme_name, product_id ) VALUES ( 750, 'Star Wars', 200 );
+
+SELECT * FROM LEGOThemes;
+
+CREATE TABLE LEGOSets
+(
+  set_id int PRIMARY KEY,
+  set_name VARCHAR NOT NULL,
+  theme_id int NOT NULL REFERENCES LEGOThemes,
+  product_id int NOT NULL REFERENCES LEGOProducts
+);
+
+INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 21005, 'Fallingwater', 210, 200 );
+INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 21014, 'Villa Savoye', 210, 200 );
+INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 60050, 'Train Station', 600, 200 );
+INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 60083, 'Snowplow Truck', 600, 200 );
+INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 75030, 'Millennium Falcon', 750, 200 );
+INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 75051, 'Snowplow Truck', 750, 200 );
+
+SELECT * FROM LEGOSets;
+
+
+CREATE TABLE LEGOBricks
+(
+  part_id int PRIMARY KEY,
+  part_name varchar NOT NULL,
+  color_id int NOT NULL,
+  color_name varchar NOT NULL
+);
+
+INSERT INTO LEGOBricks ( part_id, part_name, color_id, color_name ) VALUES ( 300226, '2x3', 26, 'Black' );
+INSERT INTO LEGOBricks ( part_id, part_name, color_id, color_name ) VALUES ( 300202, '2x3', 02, 'Grey' );
+INSERT INTO LEGOBricks ( part_id, part_name, color_id, color_name ) VALUES ( 300221, '2x3', 01, 'White' );
+
+SELECT * FROM LEGOBricks;
+
+CREATE TABLE LEGOBrickColors
+(
+  color_id int PRIMARY KEY,
+  color_name varchar NOT NULL
+);
+
+INSERT INTO LEGOBrickColors( color_id, color_name ) VALUES ( 26, 'Black' );
+INSERT INTO LEGOBrickColors( color_id, color_name ) VALUES ( 02, 'Grey' );
+INSERT INTO LEGOBrickColors( color_id, color_name ) VALUES ( 01, 'White' );
+
+SELECT * FROM LEGOBrickColors;
+
+CREATE TABLE LEGOBrickList
+(
+  part_id int NOT NULL,
+  part_name varchar NOT NULL,
+  set_id int NOT NULL,
+  quantity int NOT NULL
+);
+
+INSERT INTO LEGOBrickList ( part_id, part_name, set_id, quantity ) VALUES ( 300201, '2x3', 21014, 20 );
+INSERT INTO LEGOBrickList ( part_id, part_name, set_id, quantity ) VALUES ( 300201, '2x3', 21005, 50 );
+INSERT INTO LEGOBrickList ( part_id, part_name, set_id, quantity ) VALUES ( 300201, '2x3', 75030, 10 );
+INSERT INTO LEGOBrickList ( part_id, part_name, set_id, quantity ) VALUES ( 300202, '2x3', 21014, 45 );
+INSERT INTO LEGOBrickList ( part_id, part_name, set_id, quantity ) VALUES ( 300202, '2x3', 75051, 20 );
+INSERT INTO LEGOBrickList ( part_id, part_name, set_id, quantity ) VALUES ( 300226, '2x3', 75051, 15 );
+
+SELECT * FROM LEGOBrickList;
+
+SELECT s.set_id AS SETID, set_name AS SET, t.theme_name AS THEME, bl.part_id AS PARTID, bl.part_name AS PARTNAME, b.color_name AS PARTCOLOR, bl.quantity AS QUANTITY
+	FROM LEGOSets s
+		INNER JOIN LEGOThemes t ON t.theme_id = s.theme_id
+		INNER JOIN LEGOBrickList bl ON s.set_id = bl.set_id
+		INNER JOIN LEGOBricks b ON bl.part_id = b.part_id
+	ORDER by THEME, SET, SETID
