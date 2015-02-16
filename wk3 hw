@@ -48,7 +48,7 @@ INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 21014, 
 INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 60050, 'Train Station', 600, 200 );
 INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 60083, 'Snowplow Truck', 600, 200 );
 INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 75030, 'Millennium Falcon', 750, 200 );
-INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 75051, 'Snowplow Truck', 750, 200 );
+INSERT INTO LEGOSets ( set_id, set_name, theme_id, product_id ) VALUES ( 75051, 'Jedi Scout Fighter', 750, 200 );
 
 SELECT * FROM LEGOSets;
 
