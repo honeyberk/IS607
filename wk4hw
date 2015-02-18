@@ -1,0 +1,32 @@
+-- IS607 - Wk 4 HW
+-- Honey Berk | honey.berk@spsmail.cuny.edu
+
+-- Create organization chart
+
+DROP TABLE IF EXISTS orgchart
+
+-- Create table
+
+CREATE TABLE orgchart
+(
+  employee_id VARCHAR PRIMARY KEY,
+  name VARCHAR NOT NULL,
+  title VARCHAR NOT NULL,
+  department VARCHAR NOT NULL,
+  supervisor_id VARCHAR
+);
+
+SELECT * FROM orgchart;
+
+-- Import data from csv
+
+COPY orgchart FROM 'C:\Users\Honey\csv\orgchart.csv' WITH DELIMITER ',' CSV HEADER;
+
+-- Self join table to show who reports to whom
+
+SELECT
+employees.name AS "Employee Name", employees.title AS "Title", COALESCE(supervisors.name, 'None') AS "Supervisor Name", employees.department AS "Department"
+FROM orgchart AS employees
+LEFT JOIN orgchart AS supervisors
+ON employees.supervisor_id = supervisors.employee_id
+ORDER by employees.department, employees.employee_id
