@@ -1,0 +1,174 @@
+---
+title: "IS607 - Project 2"
+author: "Sonya Hong, Honey Berk"
+date: "Sunday, March 15, 2015"
+output: html_document
+---
+
+###Data Setup
+
+To begin, the four datasets were loaded into the Rstudio environment using read.table.Data is then combined by columns and by each of the four sets of data.
+
+```{r, echo=TRUE}
+ds <- read.table("C:/Users/Public/proj2.csv", header = TRUE, sep = ",")
+ds
+attach(ds)
+
+#define four individual datasets
+I <- cbind(xI,yI)
+II <- cbind(xII,yII)
+III <- cbind(xIII,yIII)
+IV <- cbind(xIV,yIV)
+
+#combine columns
+xall <- cbind(xI, xII, xIII, xIV)
+yall <- cbind(yI, yII, yIII, yIV)
+
+```
+
+##Exploratory Analysis
+
+**1. Descriptive statistics**
+```{r, echo=TRUE}
+#summary
+summary(ds)
+
+#correlation
+cor(xI,yI)
+cor(xII,yII)
+cor(xIII,yIII)
+cor(xIV,yIV)
+
+#variance
+var(xI,yI)
+var(xII,yII)
+var(xIII,yIII)
+var(xIV,yIV)
+```
+
+**2. Regression**
+```{r, echo=TRUE}
+#regression
+fit1 <- lm(yI~xI,data=ds)
+fit2 <- lm(yII~xII,data=ds)
+fit3 <- lm(yIII~xIII,data=ds)
+fit4 <- lm(yIV~xIV,data=ds)
+
+#regression statistics
+summary (fit1)
+summary (fit2)
+summary (fit3)
+summary (fit4)
+```
+
+**3. Visualization**
+```{r, echo=TRUE}
+
+#visualization setup
+#ggplot2
+require(ggplot2)
+
+#set up multiplot grid
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  require(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+*Scatterplots*
+```{r, echo=TRUE}
+ds1<-qplot(xI,yI,data=ds)
+ds2<-qplot(xII,yII,data=ds)
+ds3<-qplot(xIII,yIII,data=ds)
+ds4<-qplot(xIV,yIV,data=ds)
+
+plot1<- ds1+geom_point(color="blue")+geom_line()
+plot2<- ds2+geom_point(color="blue")+geom_line()
+plot3<- ds3+geom_point(color="blue")+geom_line()
+plot4<- ds4+geom_point(color="blue")+geom_line()
+multiplot(plot1, plot2, plot3, plot4, cols=2)
+```
+
+*Boxplots*
+```{r, echo=TRUE}
+#ggplot2
+box1<-ggplot(ds, aes(y=yI,x=xI))+geom_boxplot()
+box2<-ggplot(ds, aes(y=yII,x=xII))+geom_boxplot()
+box3<-ggplot(ds, aes(y=yIII,x=xIII))+geom_boxplot()
+box4<-ggplot(ds, aes(y=yIV,x=xIV))+geom_boxplot()
+multiplot(box1, box2, box3, box4, cols=2)
+
+#r
+boxplot(yall)
+```
+
+*Best fit line*
+```{r, echo=TRUE}
+fitplot1<-ds1 + geom_point(color="red") + geom_smooth(method="lm",se=TRUE)
+fitplot2<-ds2 + geom_point(color="red") + geom_smooth(method="lm",se=TRUE)
+fitplot3<-ds3 + geom_point(color="red") + geom_smooth(method="lm",se=TRUE)
+fitplot4<-ds4 + geom_point(color="red") + geom_smooth(method="lm",se=TRUE)
+multiplot(fitplot1, fitplot2, fitplot3, fitplot4, cols=2)
+```
+
+*Violin plots*
+(Must have "vioplot" package installed.)
+```{r, echo=TRUE}
+#vioplot
+library("vioplot")
+require(vioplot)
+plot(1, 1, xlim = c(0, 5), ylim = range(c(yI, yIV)), type = 'n', xlab = 'Y Datasets', ylab = 'X Values', xaxt = 'n')
+vioplot(yI, at = 1, add = T, col = 'magenta')
+vioplot(yII, at = 2, add = T, col = 'green' )
+vioplot(yIII, at = 3, add = T, col = 'blue' )
+vioplot(yIV, at = 4, add = T, col = 'red' )
+```
+
+*Parallel plot*
+(Must have "lattice" package installed.)
+```{r, echo=TRUE}
+require(lattice)
+parallelplot(~yall)
+```
+
+*Association plot*
+```{r, echo=TRUE}
+assocplot(yall)
+```
+
+**Results**
+Each of the 4 datasets have the same or similar mean, variance, correlation and linear regression line. The mean of x=9, variance of x=11, mean of y=7.5, variance of y=4.1, correlation between x and y=0.816 and the linear regression line is y=3+0.5x.
+
+**Conclusions**
+The four datasets have similar descriptive statistics but the plots of the four datasets show they each have different distributions. In addition, the plots demonstrate that there are outlier points in datasets III and IV. This exercise demonstrates how important it is to visualize the data when doing exploratory data analysis, as using only descriptive statistics may lead to misleading conclusions.
