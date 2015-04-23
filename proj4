@@ -29,6 +29,9 @@ colnames(t_posts) <- c("Title", "Date", "Author") #add colnames to table
 #View table of first page posts
 kable(t_posts)
 
+#Extend your scraper to include the base information for blog entries on all of the tagged pages. Your R
+data frame should include any necessary additional rows.
+
 #Parse first search page to find out how many total pages
 baseurl <- htmlParse("http://www.r-bloggers.com/search/web%20scraping")
 xpath <- '//*[contains(@class, "last")]'
