@@ -1,0 +1,80 @@
+library(rvest)
+library(XML)
+library(knitr)
+library(dplyr)
+library(gsubfn)
+library(tools)
+
+#Start with the first search page
+r_bloggers <- html("http://www.r-bloggers.com/search/web%20scraping")
+
+posts <- r_bloggers %>%
+  html_nodes(xpath = '//div[contains(@id,"post")]')
+
+titles <- posts %>%
+  html_nodes(xpath = 'h2/a/text()')
+t_titles <- data.frame(sapply(titles,xmlValue))  
+
+dates <- posts %>%
+  html_nodes(xpath = 'div[1]/div')
+t_dates <- data.frame(sapply(dates,xmlValue))
+
+authors <- posts %>%
+  html_nodes(xpath = 'div[1]/a')
+t_authors <- data.frame(sapply(authors,xmlValue))  
+
+t_posts <- cbind(Title = t_titles, Date = t_dates, Author = t_authors) #merge tables
+colnames(t_posts) <- c("Title", "Date", "Author") #add colnames to table
+
+#View table of first page posts
+kable(t_posts)
+
+#Parse first search page to find out how many total pages
+baseurl <- htmlParse("http://www.r-bloggers.com/search/web%20scraping")
+xpath <- '//*[contains(@class, "last")]'
+total_pages <- as.numeric(xpathSApply(baseurl, xpath, xmlValue))
+total_pages
+
+#Move to other pages
+
+#Page number substituted here
+substitute_url_args <- function(url, list_args) {
+  gsubfn("%\\((.*?)\\)s", x = url, env = list_args)
+}
+
+n <- total_pages
+for(i in 2:n) {
+
+#Page number substituted here
+s <- "http://www.r-bloggers.com/search/web%20scraping/page/%(id)s"
+L <- list(id = i)
+newurl <- substitute_url_args(s, L)
+
+#Post data pulled from page
+r_bloggers <- html(newurl)
+
+posts <- r_bloggers %>%
+  html_nodes(xpath = '//div[contains(@id,"post")]')
+
+titles <- posts %>%
+  html_nodes(xpath = 'h2/a/text()')
+t_titles <- data.frame(sapply(titles,xmlValue))  
+
+dates <- posts %>%
+  html_nodes(xpath = 'div[1]/div')
+t_dates <- data.frame(sapply(dates,xmlValue))
+
+authors <- posts %>%
+  html_nodes(xpath = 'div[1]/a')
+t_authors <- data.frame(sapply(authors,xmlValue))  
+
+t_posts_new <- cbind(Title = t_titles, Date = t_dates, Author = t_authors) #merge tables
+colnames(t_posts_new) <- c("Title", "Date", "Author") #add colnames to table
+
+t_posts <- bind_rows(t_posts, t_posts_new)
+
+}
+
+#View table of all posts in all search results pages
+kable(t_posts)
+ 
