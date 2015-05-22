@@ -1,0 +1,29 @@
+1. Your first job is to produce the code to read in the CSV files to create the proper output. Note that student nodes will have relationships with both courses (enrolled or completed) and dormitories (housed).
+#data-students-and-housing.csv file was left intact. data-courses.csv file was split into two csvs – one for enrolled (in progress) courses (data-enrolled.csv) and one for completed courses (data.completed.csv).
+
+#Delete all
+match (a) optional match (a)-[r]-() delete a,r
+
+#Load student and housing data, create “Housed” relationship
+LOAD CSV WITH HEADERS FROM "file:C:/Users/Public/data-students-and-housing.csv" AS csvData CREATE (student:Student {firstname: csvData.GivenName, lastname: csvData.Surname, id: csvData.id, gender: csvData.Gender, address: csvData.StreetAddress, city: csvData.City, state: csvData.State, zipcode: csvData.ZipCode, phone: csvData.TelephoneNumber }) MERGE (dormitory:Dormitory { name: csvData.Dormitory}) CREATE (student)-[:Housed {room: csvData.Room }]->(dormitory)
+
+#Load completed course data, create “Enrolled” relationship
+LOAD CSV WITH HEADERS FROM "file:C:/Users/Public/data-enrolled.csv" AS csvData MATCH (student:Student {id: csvData.id}) MERGE (course:Course { department: csvData.CourseDept, number: csvData.CourseNumber, title: csvData.CourseName }) CREATE (student)-[:Enrolled {section: csvData.Section, instructor: csvData.Instructor, grade: csvData.Grade}]->(course)
+
+#Load completed course data, create “Completed” relationship
+LOAD CSV WITH HEADERS FROM "file:C:/Users/Public/data-completed.csv" AS csvData MATCH (student:Student {id: csvData.id}) MERGE (course:Course { department: csvData.CourseDept, number: csvData.CourseNumber, title: csvData.CourseName }) CREATE (student)-[:Completed {section: csvData.Section, instructor: csvData.Instructor, grade: csvData.Grade}]->(course)
+
+2. In addition, please provide a short paragraph commenting on whether a graph database is a better choice or a worse choice than a SQL database for this task. Back up your claim succinctly with explanation.
+Although I find neo4j to be very confusing and resent its lack of a quick learning curve (!), it seems as though a graph database is really a better choice for this task than a SQL database. Primarily, the advantage seems to be in the fact that a graph database can handle many-to-many relationships with much less effort – no JOINs on foreign keys, etc. It would seem that the ability of the graph database to map relationships without much fanfare would allow for much faster processing of complex data.
+
+3. Write the Cypher query that will find all of the roommates of the student Richard Kowalski.
+
+#Find Richard Kowalski’s roommates
+MATCH (roommate:Student)-[h:Housed]->(dorm:Dormitory) MATCH (kowalski:Student {firstname: "Richard", lastname: "Kowalski"})-[roommateh:Housed]->(dorm) WHERE h.room = roommateh.room AND roommate <> kowalski RETURN roommate
+
+4. Finally, suppose you were told Richard Kowalski, who was enrolled in section 12136 of Math 120: Finite
+Mathematics, completed the course with a grade of B. Show the query that would find the appropriate relationship and update both the label (enrolled to completed) and the grade.
+
+#Update record for Richard Kowalski, who was enrolled in section 12136 of Math 120: Finite Mathematics, to show that he completed the course with a grade of B
+MATCH (kowalski:Student {id:"19457"})-[e:Enrolled]->(course:Course {number: "120"}) CREATE (kowalski)-[c:Completed {section: e.section, grade: "B"}]->(course) DELETE e RETURN kowalski,c,course DELETE e RETURN rk,c,course
+
